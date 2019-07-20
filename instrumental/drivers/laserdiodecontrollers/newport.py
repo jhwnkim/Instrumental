@@ -8,6 +8,9 @@ Driver for Newport Laser Diode Controllers
 from . import LaserDiodeController
 from .. import VisaMixin, SCPI_Facet
 
+# from instrumental.drivers.laserdiodecontrollers import LaserDiodeController
+# from instrumental.drivers import VisaMixin, SCPI_Facet
+
 
 class Model5005(LaserDiodeController, VisaMixin):
     _INST_PARAMS_ = ['visa_address']
