@@ -1,4 +1,4 @@
-# Auto-generated 2019-05-06T16:23:11.970004
+# Auto-generated 2019-07-20T17:16:25.946298
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -54,6 +54,14 @@ driver_info = OrderedDict([
         'imports': [],
         'visa_info': {
             'LDC3724B': ('ILX Lightwave', ['3724B']),
+        },
+    }),
+    ('laserdiodecontrollers.newport', {
+        'params': ['visa_address'],
+        'classes': ['Model5005'],
+        'imports': [],
+        'visa_info': {
+            'Model5005': ('Newport', ['5005']),
         },
     }),
     ('lockins.sr844', {
@@ -117,9 +125,10 @@ driver_info = OrderedDict([
     }),
     ('powermeters.thorlabs', {
         'params': ['visa_address'],
-        'classes': ['PM100D'],
+        'classes': ['PM100A', 'PM100D'],
         'imports': [],
         'visa_info': {
+            'PM100A': ('Thorlabs', ['PM100A']),
             'PM100D': ('Thorlabs', ['PM100D']),
         },
     }),

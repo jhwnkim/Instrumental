@@ -8,10 +8,6 @@ Driver for Newport Laser Diode Controllers
 from . import LaserDiodeController
 from .. import VisaMixin, SCPI_Facet
 
-# from instrumental.drivers.laserdiodecontrollers import LaserDiodeController
-# from instrumental.drivers import VisaMixin, SCPI_Facet
-
-
 class Model5005(LaserDiodeController, VisaMixin):
     _INST_PARAMS_ = ['visa_address']
     _INST_VISA_INFO_ = ('Newport', ['5005'])
@@ -19,7 +15,7 @@ class Model5005(LaserDiodeController, VisaMixin):
     def _initialize(self):
         self._rsrc.read_termination = '\n'
 
-    current = SCPI_Facet('LAS:LDI', units='mA', convert=float)
+    # current = SCPI_Facet('LAS:LDI', units='mA', convert=float) # Does not change current, inquiry sent to Newport
     output = SCPI_Facet('LAS:OUT', convert=int)
 
     # Tell list_instruments how to close this VISA resource properly
