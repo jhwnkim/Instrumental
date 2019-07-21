@@ -1,4 +1,4 @@
-# Auto-generated 2019-07-20T17:16:25.946298
+# Auto-generated 2019-07-21T00:23:02.286325
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -121,6 +121,14 @@ driver_info = OrderedDict([
         'imports': [],
         'visa_info': {
             'HPMultimeter': ('HEWLETT-PACKARD', ['34401A']),
+        },
+    }),
+    ('powermeters.ilx_lightwave', {
+        'params': ['visa_address'],
+        'classes': ['OMM_6810B'],
+        'imports': [],
+        'visa_info': {
+            'OMM_6810B': ('ILX Lightwave', ['6810B']),
         },
     }),
     ('powermeters.thorlabs', {
