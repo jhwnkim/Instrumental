@@ -14,6 +14,8 @@ class Model5005(LaserDiodeController, VisaMixin):
 
     def _initialize(self):
         self._rsrc.read_termination = '\n'
+        # *CLS, *RST resets current settings so don't
+        # self.write('*CLS')
 
     # current = SCPI_Facet('LAS:LDI', units='mA', convert=float) # Does not change current, inquiry sent to Newport
     output = SCPI_Facet('LAS:OUT', convert=int)
