@@ -35,14 +35,17 @@ class OMM_6810B(PowerMeter, VisaMixin):
     #                         doc="Measured Power")
     # Not using SCPI_Facet because the value gets stuck when auto ranging
     def power(self):
-        # Turn on auto ranging mode
-        self.write('POWER:AUTO 1')
-        self.write('POWER:AUTO 0')
+        # Turn on auto ranging mode - auto ranging must be off for the power meter to update values
+        # self.write('POWER:AUTO 1')
+        # self.write('POWER:AUTO 0')
 
         return Q_(float(self.query('POW?')), units='W')
 
     wavelength = SCPI_Facet('WAVE', units='nm', type=float,
                             doc="Input signal wavelength")
+
+    auto_range = SCPI_Facet('POWER:AUTO', convert=int, value={False:0, True:1},
+                            doc="Whether auto-ranging is enabled")
 
     # Methods for setting averaging filter speed
     def set_slow_filter(self):
