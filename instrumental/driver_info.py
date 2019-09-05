@@ -1,4 +1,4 @@
-# Auto-generated 2019-07-21T00:23:02.286325
+# Auto-generated 2019-09-05T00:49:18.570484
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -146,6 +146,14 @@ driver_info = OrderedDict([
         'imports': [],
         'visa_info': {
             'GPD_3303S': ('GW INSTEK', ['GPD-3303S']),
+        },
+    }),
+    ('relaycontrollers.probecardinterface', {
+        'params': ['visa_address'],
+        'classes': ['ProbecardInterface'],
+        'imports': [],
+        'visa_info': {
+            'ProbecardInterface': ('MIT POE GROUP', ['Probecard-interface']),
         },
     }),
     ('scopes.agilent', {
