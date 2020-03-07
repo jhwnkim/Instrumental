@@ -1,4 +1,4 @@
-# Auto-generated 2019-09-05T12:27:20.365142
+# Auto-generated 2020-02-14T22:25:34.343693
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -122,6 +122,11 @@ driver_info = OrderedDict([
         'visa_info': {
             'HPMultimeter': ('HEWLETT-PACKARD', ['34401A']),
         },
+    }),
+    ('opticalswitch.diconopticalswitch', {
+        'params': ['port'],
+        'classes': ['DiConOpticalSwitch'],
+        'imports': ['serial'],
     }),
     ('powermeters.ilx_lightwave', {
         'params': ['visa_address'],
