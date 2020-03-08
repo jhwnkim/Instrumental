@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 Driver for controlling Klinger Scientific CC1.1 motor controller
+
+Usage Example:
+from instrumental.drivers.motion.klinger import KlingerMotorController
+mc = KlingerMotorController(visa_address'GPIB0::8::INSTR')
+mc.set_steprate(R=128, S=2, F=20)
+mc.go_steps(N=1000)
+mc.close()
 """
 
 from . import Motion
@@ -8,8 +15,7 @@ from . import Motion
 # from ...log import get_logger
 # from .. import VisaMixin
 # from ..util import check_units
-from ... import u
-from .. import open_visa_inst
+# from ... import u
 
 import visa
 #
@@ -38,12 +44,13 @@ class KlingerMotorController(Motion):
     def close(self):
         self._rsrc.close()
 
-    def go_steps(self, N=0):
+    def go_steps(self, N):
         if N>0 and N<160000:
             self._rsrc.write("N {}".format(N))
             self._rsrc.write("+")
             self._rsrc.write("G")
-        elif: N<0 and N>-160000:
+
+        elif N<0 and N>-160000:
             self._rsrc.write("N {}".format(-N))
             self._rsrc.write("-")
             self._rsrc.write("G")

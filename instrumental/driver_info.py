@@ -1,4 +1,4 @@
-# Auto-generated 2020-02-14T22:25:34.343693
+# Auto-generated 2020-03-07T17:42:38.264404
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -104,6 +104,12 @@ driver_info = OrderedDict([
         'params': ['serial'],
         'classes': ['Filter_Flipper'],
         'imports': ['cffi', 'nicelib'],
+    }),
+    ('motion.klinger', {
+        'params': ['visa_address'],
+        'classes': ['KlingerMotorController'],
+        'imports': ['visa'],
+        'visa_info': {},
     }),
     ('motion.newmark', {
         'params': ['serial'],
