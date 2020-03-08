@@ -3,21 +3,16 @@
 Driver for HP 4156C on GPIB communication
 
 Usage Example:
-from instrumental.drivers.sourcemeasureunit.hp import HPSemiParamAnalyzer
-smu = HPSemiParamAnalyzer(visa_address='GPIB0::17::INSTR')
-switch.identify()
-switch.close()
+from instrumental.drivers.sourcemeasureunit.hp import HP_4156C
+smu = HP_4156C(visa_address='GPIB0::17::INSTR')
+smu.identify()
+smu.close()
 """
 
 from . import SourceMeasureUnit
 from .. import VisaMixin
-from ..util import visa_timeout_context
 
-class HPSemiParamAnalyzer(SourceMeasureUnit, VisaMixin):
-    _INST_PARAMS_ = ['visa_address']
-    _INST_VISA_INFO = {
-        'HpSemiParamAnalyzer': ('HEWLETT-PACKARD', ['4156C'])
-    }
+class HpSMU(SourceMeasureUnit, VisaMixin):
     _NUM_OF_CHANNELS = 4
     _DEFAULT_CURRENT_COMPLIANCE = 0.001 # in A
     _VISA_TIMEOUT = 10000
@@ -29,24 +24,24 @@ class HPSemiParamAnalyzer(SourceMeasureUnit, VisaMixin):
         # self.write('*CLS')
 
         # Increase timeout
-        self._rsrc.timeout = _VISA_TIMEOUT
+        self._rsrc.timeout = HpSMU._VISA_TIMEOUT
 
         # initialize variables
         self._channel = 1
         self._voltage = 0.0 # V
-        self._compliance = _DEFAULT_CURRENT_COMPLIANCE
+        self._compliance = HpSMU._DEFAULT_CURRENT_COMPLIANCE
 
         # initialize instrument
         self.write("*RST")
         # Initialize channels 1~4
-        for ch_index in range(_NUM_OF_CHANNELS):
+        for ch_index in range(HpSMU._NUM_OF_CHANNELS):
             self.initialize_channel(ch_index+1)
 
     def identify(self):
         print(self.query('*IDN?'))
 
     def set_channel(self, channel):
-        if channel >0 and channel <= _NUM_OF_CHANNELS:
+        if channel >0 and channel <= HpSMU._NUM_OF_CHANNELS:
             self._channel = channel
             self.write("CN %d" % channel)
         else:
@@ -75,7 +70,7 @@ class HPSemiParamAnalyzer(SourceMeasureUnit, VisaMixin):
         Sets the voltage to the specified value (in V)
         :return:
         """
-        print('Setting param Analyzer voltage to %.4f V' % voltage)
+        print('Setting HP SMU channel %d voltage to %.4f V' % (self._channel, voltage))
         self.write("DV %d,12,%.5E,%.4f" % (self._channel, voltage,
                                                   self._compliance))
         self._voltage = voltage
@@ -126,3 +121,8 @@ class HPSemiParamAnalyzer(SourceMeasureUnit, VisaMixin):
         self.write(":PAGE")
 
         resource.control_ren(False)  # Disable remote mode
+
+# Models
+class HP_4156C(HpSMU):
+    _INST_PARAMS_ = ['visa_address']
+    _INST_VISA_INFO_ = ('HEWLETT-PACKARD', ['4156C'])

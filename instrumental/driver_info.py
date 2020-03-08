@@ -1,4 +1,4 @@
-# Auto-generated 2020-03-08T09:47:29.186800
+# Auto-generated 2020-03-08T10:35:01.891903
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -190,9 +190,11 @@ driver_info = OrderedDict([
     }),
     ('sourcemeasureunit.hp', {
         'params': ['visa_address'],
-        'classes': ['HPSemiParamAnalyzer'],
+        'classes': ['HP_4156C'],
         'imports': [],
-        'visa_info': {},
+        'visa_info': {
+            'HP_4156C': ('HEWLETT-PACKARD', ['4156C']),
+        },
     }),
     ('spectrometers.bristol', {
         'params': ['port'],
