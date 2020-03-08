@@ -11,6 +11,7 @@ smu.close()
 
 from . import SourceMeasureUnit
 from .. import VisaMixin
+from ... import Q_
 
 class HpSMU(SourceMeasureUnit, VisaMixin):
     _NUM_OF_CHANNELS = 4
@@ -28,8 +29,8 @@ class HpSMU(SourceMeasureUnit, VisaMixin):
 
         # initialize variables
         self._channel = 1
-        self._voltage = 0.0 # V
-        self._compliance = HpSMU._DEFAULT_CURRENT_COMPLIANCE
+        self._voltage = Q_(0.0, 'V') # V
+        self._compliance = Q_(HpSMU._DEFAULT_CURRENT_COMPLIANCE, 'A')
 
         # initialize instrument
         self.write("*RST")
@@ -67,12 +68,12 @@ class HpSMU(SourceMeasureUnit, VisaMixin):
 
     def set_voltage(self, voltage):
         """
-        Sets the voltage to the specified value (in V)
+        Sets the voltage to the specified value, voltage should be Q_ type
         :return:
         """
-        print('Setting HP SMU channel %d voltage to %.4f V' % (self._channel, voltage))
-        self.write("DV %d,12,%.5E,%.4f" % (self._channel, voltage,
-                                                  self._compliance))
+        print('Setting HP SMU channel {} voltage to {:.4f}'.format(self._channel, voltage))
+        self.write("DV {},12,{:.5E},{:.4f}".format(self._channel, voltage.magnitude,
+                                                  self._compliance.magnitude))
         self._voltage = voltage
 
     def initialize_channel(self, channel):
@@ -90,13 +91,13 @@ class HpSMU(SourceMeasureUnit, VisaMixin):
         self.write("SLI 1") # short integration time
         # self.sparam.write("FL 0")
         self.write("CN %d" % channel)
-        self.write("DV 2,11,0," + str(self._compliance))
+        self.write("DV 2,11,0," + str(self._compliance.magnitude))
 
-        self.set_voltage(0.0)
+        self.set_voltage(Q_(0.0, 'V'))
 
     def set_current_compliance(self, compliance):
         """
-        :param compliance: In Amps
+        :param compliance: In Q_ type
         :return:
         """
         self._compliance = compliance
@@ -107,9 +108,9 @@ class HpSMU(SourceMeasureUnit, VisaMixin):
         :return: The current in A
         """
         try:
-            current = float(self.query("TI? %d,0" % self._channel))*1e-3
+            current = Q_(float(self.query("TI? %d,0" % self._channel)), 'A')
         except ValueError:
-            current = 0.0
+            current = Q_(0.0, 'A')
 
         return current
 
