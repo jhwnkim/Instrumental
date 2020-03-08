@@ -5,7 +5,7 @@ Driver for controlling Klinger Scientific CC1.1 motor controller
 Usage Example:
 from instrumental.drivers.motion.klinger import KlingerMotorController
 mc = KlingerMotorController(visa_address='GPIB0::8::INSTR')
-mc.set_steprate(R=128, S=2, F=20)
+mc.set_steprate(R=254, S=1, F=29)
 mc.go_steps(N=1000)
 mc.close()
 """
@@ -45,12 +45,12 @@ class KlingerMotorController(Motion):
         self._rsrc.close()
 
     def go_steps(self, N):
-        if N>0 and N<160000:
+        if N>0 and N<65536:
             self._rsrc.write("N {}".format(N))
             self._rsrc.write("+")
             self._rsrc.write("G")
 
-        elif N<0 and N>-160000:
+        elif N<0 and N>-65536:
             self._rsrc.write("N {}".format(-N))
             self._rsrc.write("-")
             self._rsrc.write("G")
