@@ -4,7 +4,7 @@ Driver for controlling Klinger Scientific CC1.1 motor controller
 
 Usage Example:
 from instrumental.drivers.motion.klinger import KlingerMotorController
-mc = KlingerMotorController(visa_address'GPIB0::8::INSTR')
+mc = KlingerMotorController(visa_address='GPIB0::8::INSTR')
 mc.set_steprate(R=128, S=2, F=20)
 mc.go_steps(N=1000)
 mc.close()
@@ -58,7 +58,7 @@ class KlingerMotorController(Motion):
             print('Invalid steps for given N')
 
     def go_nm(self, nm=0):
-        pass
+        self.go_steps(N=nm*10)
 
     def set_steprate(self, R, S, F):
         # Step rate R (1~255) - larger is faster
