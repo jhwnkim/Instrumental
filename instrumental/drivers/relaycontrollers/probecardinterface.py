@@ -25,7 +25,7 @@ class ProbecardInterface(RelayController, VisaMixin):
     polarity = SCPI_Facet(':ROUTE:POLARITY', convert=int)
 
     lamp = SCPI_Facet(':LAMP:OUT', convert=int)
-    
+
     # Tell list_instruments how to close this VISA resource properly
     @staticmethod
     def _close_resource(resource):
