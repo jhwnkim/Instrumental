@@ -1,4 +1,4 @@
-# Auto-generated 2020-03-07T17:42:38.264404
+# Auto-generated 2020-03-08T09:47:29.186800
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -187,6 +187,12 @@ driver_info = OrderedDict([
             'TDS_2000': ('TEKTRONIX', ['TDS 2002B', 'TDS 2004B', 'TDS 2012B', 'TDS 2014B', 'TDS 2022B', 'TDS 2024B']),
             'TDS_3000': ('TEKTRONIX', ['TDS 3012', 'TDS 3012B', 'TDS 3012C', 'TDS 3014', 'TDS 3014B', 'TDS 3014C', 'TDS 3032', 'TDS 3032B', 'TDS 3032C', 'TDS 3034', 'TDS 3034B', 'TDS 3034C', 'TDS 3052', 'TDS 3052B', 'TDS 3052C', 'TDS 3054', 'TDS 3054B', 'TDS 3054C']),
         },
+    }),
+    ('sourcemeasureunit.hp', {
+        'params': ['visa_address'],
+        'classes': ['HPSemiParamAnalyzer'],
+        'imports': [],
+        'visa_info': {},
     }),
     ('spectrometers.bristol', {
         'params': ['port'],
