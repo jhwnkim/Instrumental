@@ -215,25 +215,32 @@ class Instrument(with_metaclass(InstrumentMeta, object)):
     @classmethod
     def _create(cls, paramset, **other_attrs):
         """Factory method meant to be used by `instrument()`"""
+        log.debug('Calling _create()')
+        cls_paramset = ParamSet(cls, **paramset)
+
+        matching_insts = [open_inst for open_inst in cls._instances
+                          if cls_paramset.matches(open_inst._paramset)]
+        if matching_insts:
+            if _REOPEN_POLICY == 'strict':
+                raise InstrumentExistsError(
+                    "Device instance already exists, cannot open in strict mode. Use a reopen "
+                    "policy of 'reuse' or 'new' if other behavior is desired. See the Instrumental "
+                    "docs for more information")
+            elif _REOPEN_POLICY == 'reuse':
+                # TODO: Should we return something other than the first element?
+                log.info('Reopen Policy is "reuse": returning existing instrument')
+                return matching_insts[0]
+            elif _REOPEN_POLICY == 'new':
+                log.info('Reopen Policy is "new": creating new instance')
+                pass  # Cross our fingers and try to open a new instance
+
         obj = object.__new__(cls)  # Avoid our version of __new__
         for name, value in other_attrs.items():
             setattr(obj, name, value)
-        obj._paramset = ParamSet(cls, **paramset)
-
-        matching_insts = [open_inst for open_inst in obj._instances
-                          if obj._paramset.matches(open_inst._paramset)]
-        if matching_insts:
-            if _REOPEN_POLICY == 'strict':
-                raise InstrumentExistsError("Device instance already exists, cannot open in strict "
-                                            "mode")
-            elif _REOPEN_POLICY == 'reuse':
-                # TODO: Should we return something other than the first element?
-                return matching_insts[0]
-            elif _REOPEN_POLICY == 'new':
-                pass  # Cross our fingers and try to open a new instance
-
+        obj._paramset = cls_paramset
         obj._before_init()
         obj._fill_out_paramset()
+        log.debug('Calling _initialize()')
         obj._initialize(**paramset.get('settings', {}))
         obj._after_init()
         return obj
@@ -249,6 +256,7 @@ class Instrument(with_metaclass(InstrumentMeta, object)):
 
     def _before_init(self):
         """Called just before _initialize"""
+        log.debug('Calling _before_init()')
         self._driver_name = driver_submodule_name(self.__class__.__module__)
         # TODO: consider setting the _module at the class level
         if not hasattr(self.__class__, '_module'):
@@ -259,6 +267,7 @@ class Instrument(with_metaclass(InstrumentMeta, object)):
 
     def _after_init(self):
         """Called just after _initialize"""
+        log.debug('Calling _after_init()')
         cls = self.__class__
 
         # Only add the instrument after init, to ensure it hasn't failed to open
@@ -266,6 +275,7 @@ class Instrument(with_metaclass(InstrumentMeta, object)):
         self._instances.add(self)
 
     def _fill_out_paramset(self):
+        log.debug('Calling _fill_out_paramset()')
         # TODO: Fix the _INST_ system more fundamentally and remove this hack
         if hasattr(self, '_INST_PARAMS_'):
             mod_params = self._INST_PARAMS_
@@ -1113,7 +1123,7 @@ def instrument(inst=None, **kwargs):
     if isinstance(inst, Instrument):
         return inst
 
-    with _reopen_context(kwargs.pop('reopen_policy', 'reuse')):
+    with _reopen_context(kwargs.pop('reopen_policy', 'strict')):
         params, alias = _extract_params(inst, kwargs)
 
         if 'server' in params:
