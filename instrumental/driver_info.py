@@ -1,4 +1,4 @@
-# Auto-generated 2019-05-06T16:23:11.970004
+# Auto-generated 2020-04-08T12:31:34.162153
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -22,6 +22,12 @@ driver_info = OrderedDict([
         'classes': ['NIDAQ'],
         'imports': ['nicelib >= 0.5'],
     }),
+    ('frequencycounters.keysight', {
+        'params': ['visa_address'],
+        'classes': ['FC53220A'],
+        'imports': ['instrumental'],
+        'visa_info': {},
+    }),
     ('funcgenerators.agilent', {
         'params': ['visa_address'],
         'classes': ['Agilent33250A', 'AgilentE4400B', 'AgilentMXG'],
@@ -35,9 +41,9 @@ driver_info = OrderedDict([
     ('funcgenerators.rigol', {
         'params': ['visa_address'],
         'classes': [],
-        'imports': [],
+        'imports': ['visa'],
         'visa_info': {
-            'DG800': ('Rigol Technologies', ['DG812']),
+            'DG800': ('Rigol Technologies', ['DG811', 'DG812']),
         },
     }),
     ('funcgenerators.tektronix', {
