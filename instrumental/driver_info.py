@@ -1,4 +1,4 @@
-# Auto-generated 2020-03-08T10:35:01.891903
+# Auto-generated 2020-04-10T20:09:27.406922
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -194,6 +194,14 @@ driver_info = OrderedDict([
         'imports': [],
         'visa_info': {
             'HP_4156C': ('HEWLETT-PACKARD', ['4156C']),
+        },
+    }),
+    ('sourcemeasureunit.keithley', {
+        'params': ['visa_address'],
+        'classes': ['Keithley_2400'],
+        'imports': [],
+        'visa_info': {
+            'Keithley_2400': ('Keithley', ['2400']),
         },
     }),
     ('spectrometers.bristol', {

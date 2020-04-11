@@ -18,11 +18,13 @@ class KeithleySMU(SourceMeasureUnit, VisaMixin):
     _VISA_TIMEOUT = 10000 # in ms
 
     def _initialize(self):
-        sparam.write("*RST")
-        time.sleep(1.0)
+        self.write("*RST")
+        # time.sleep(1.0)
 
         # Increase timeout
         self._rsrc.timeout = KeithleySMU._VISA_TIMEOUT
+        self._rsrc.read_termination = '\n'
+        self._rsrc.write_termination = '\n'
 
         # initialize variables
         self._voltage = Q_(0.0, 'V') # V
@@ -40,7 +42,7 @@ class KeithleySMU(SourceMeasureUnit, VisaMixin):
         self.write(':SENS:CURR:PROT {}'.format(KeithleySMU._DEFAULT_CURRENT_COMPLIANCE))
         self.write(':SENS:FUNC "CURR"')
         self.write(':SENS:CURR:RANG:AUTO 1')
-        self.write(':SENS:CURR:NPLC 1')
+        self.write(':SENS:CURR:NPLC 10') # set integration to maximum power line cycles
 
         self.write(':OUTP ON')
 
@@ -66,7 +68,7 @@ class KeithleySMU(SourceMeasureUnit, VisaMixin):
         """
         print('Setting Keithley SMU voltage to {:.4f}'.format(voltage))
 
-        self.write(':SOUR:VOLT:LEV:AMPL {:.5E}'.format(voltage.magnitude))
+        self.write(':SOUR:VOLT:LEV:AMPL {:.5E}'.format(voltage.to('V').magnitude))
 
         self._voltage = voltage
 
@@ -76,7 +78,7 @@ class KeithleySMU(SourceMeasureUnit, VisaMixin):
         :return:
         """
         self._compliance = compliance
-        self.write(':SENS:CURR:PROT {}'.format(compliance))
+        self.write(':SENS:CURR:PROT {:.5E}'.format(compliance.to('A').magnitude))
 
     def measure_current(self):
         """
@@ -84,7 +86,7 @@ class KeithleySMU(SourceMeasureUnit, VisaMixin):
         :return: The current in A
         """
         try:
-            current = Q_(float(self.query("MEASure:CURRent?")), 'A')
+            current = Q_(float(self.query(':READ?').split(',')[1]), 'A')
         except ValueError:
             current = Q_(0.0, 'A')
 
