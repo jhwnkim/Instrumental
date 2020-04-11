@@ -72,8 +72,8 @@ class HpSMU(SourceMeasureUnit, VisaMixin):
         :return:
         """
         print('Setting HP SMU channel {} voltage to {:.4f}'.format(self._channel, voltage))
-        self.write("DV {},12,{:.5E},{:.4f}".format(self._channel, voltage.magnitude,
-                                                  self._compliance.magnitude))
+        self.write("DV {},12,{:.5E},{:.4f}".format(self._channel, voltage.to('V').magnitude,
+                                                  self._compliance.to('A').magnitude))
         self._voltage = voltage
 
     def initialize_channel(self, channel):
@@ -91,7 +91,7 @@ class HpSMU(SourceMeasureUnit, VisaMixin):
         self.write("SLI 1") # short integration time
         # self.sparam.write("FL 0")
         self.write("CN %d" % channel)
-        self.write("DV 2,11,0," + str(self._compliance.magnitude))
+        self.write("DV 2,11,0," + str(self._compliance.to('A').magnitude))
 
         self.set_voltage(Q_(0.0, 'V'))
 
