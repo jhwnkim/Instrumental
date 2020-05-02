@@ -49,6 +49,7 @@ MODEL_CHANNELS = {
     'TDS 3054': 4,
     'TDS 3054B': 4,
     'TDS 3054C': 4,
+    'TDS7154': 4,
     'MSO2012': 2,
     'DPO2012': 2,
     'MSO2014': 4,
@@ -180,7 +181,7 @@ class TekScope(Scope, VisaMixin):
             'yun': strstr(self.query("wfmpre:yun?")),
         }
 
-    def get_data(self, channel=1, width=2):
+    def get_data(self, channel=1, width=2, bounds=None):
         """Retrieve a trace from the scope.
 
         Pulls data from channel `channel` and returns it as a tuple ``(t,y)``
@@ -192,6 +193,8 @@ class TekScope(Scope, VisaMixin):
             Channel number to pull trace from. Defaults to channel 1.
         width : int, optional
             Number of bytes per sample of data pulled from the scope. 1 or 2.
+        bounds : tuple of int, optional
+            (start, stop) tuple of first and last sample to read. Index starts at 1.
 
         Returns
         -------
@@ -204,14 +207,21 @@ class TekScope(Scope, VisaMixin):
 
         with self.transaction():
             self.write("data:source ch{}".format(channel))
-            try:
-                # scope *should* truncate this to record length if it's too big
-                stop = self.max_waveform_length
-            except AttributeError:
-                stop = 1000000
             self.write("data:width {}", width)
             self.write("data:encdg RIBinary")
-            self.write("data:start 1")
+
+        if bounds is None:
+            start = 1
+            # scope *should* truncate this to record length if it's too big
+            stop = getattr(self, 'max_waveform_length', 1000000)
+        else:
+            start, stop = bounds
+            wfm_len = self.waveform_length
+            if not (1 <= start <= stop <= wfm_len):
+                raise ValueError('bounds must satisfy 1 <= start <= stop <= {}'.format(wfm_len))
+
+        with self.transaction():
+            self.write("data:start {}".format(start))
             self.write("data:stop {}".format(stop))
 
         #self.resource.flow_control = 1  # Soft flagging (XON/XOFF flow control)
@@ -504,6 +514,16 @@ class TDS_3000(StatScope):
                                  doc="Record length of the source waveform")
     datetime = TekScope._datetime
 
+
+class TDS_7000(TekScope):
+    """A Tektronix TDS 7000 series oscilloscope"""
+    _INST_PARAMS_ = ['visa_address']
+    _INST_VISA_INFO_ = ('TEKTRONIX', ['TDS7154', 'TDS7254',
+                                      'TDS7404'])
+
+    max_waveform_length = 500000
+    waveform_length = SCPI_Facet('horizontal:recordlength', convert=int, readonly=True,
+                                 doc="Record length of the source waveform")
 
 class MSO_DPO_2000(StatScope):
     """A Tektronix MSO/DPO 2000 series oscilloscope."""
