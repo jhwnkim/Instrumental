@@ -55,11 +55,24 @@ class KeithleySMU(SourceMeasureUnit, VisaMixin):
         :param time: float, 0.01 to 10, 1.0 is default
         :return:
         """
-        if time<0.01 or time>10:
-            print('KeithleySMU: Specified integration time is not correct. Input 0.01 to 10 power cycles.')
-            return
+        if isinstance(time, str):
+            if time == 'short':
+                self.write(':SENS:CURR:NPLC 0.01')
+            elif time == 'med' or time=='medium':
+                self.write(':SENS:CURR:NPLC 1.0')
+            elif time == 'long':
+                self.write(':SENS:CURR:NPLC 10')
+            else:
+                print('KeithleySMU: Specified integration time {} is not correct.'.format(time))
+                return
+        elif isinstance(time, float):
+            if time<0.01 or time>10:
+                print('KeithleySMU: Specified integration time is not correct. Input 0.01 to 10 power cycles.')
+                return
+            else:
+                self.write(':SENS:CURR:NPLC {:.2f}'.format(time))
         else:
-            self.write(':SENS:CURR:NPLC {:.2f}'.format(time))
+            print('KeithleySMU: Unsupported type {} for integration time'.format(type(time)))
 
     def set_voltage(self, voltage):
         """
