@@ -4,17 +4,14 @@
 Driver module for Thorlabs power meters. Supports:
 
 * PM100D
+* PM100A
 """
 import numpy
 from . import PowerMeter
 from .. import Facet, SCPI_Facet, VisaMixin, deprecated
 from ... import Q_
 
-
-class PM100D(PowerMeter, VisaMixin):
-    """A Thorlabs PM100D series power meter"""
-    _INST_PARAMS_ = ['visa_address']
-    _INST_VISA_INFO_ = ('Thorlabs', ['PM100D'])
+class ThorlabsPowerMeter(PowerMeter, VisaMixin):
 
     @deprecated('power')
     def get_power(self):
@@ -136,3 +133,14 @@ class PM100D(PowerMeter, VisaMixin):
         self.set_num_averaged(n_avg)
 
         return Q_(raw_arr.mean(), 'W').plus_minus(raw_arr.std())
+
+
+class PM100D(ThorlabsPowerMeter):
+    """A Thorlabs PM100D series power meter"""
+    _INST_PARAMS_ = ['visa_address']
+    _INST_VISA_INFO_ = ('Thorlabs', ['PM100D'])
+
+class PM100A(ThorlabsPowerMeter):
+    """A Thorlabs PM100A series power meter"""
+    _INST_PARAMS_ = ['visa_address']
+    _INST_VISA_INFO_ = ('Thorlabs', ['PM100A'])

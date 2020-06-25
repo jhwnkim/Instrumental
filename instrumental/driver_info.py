@@ -62,6 +62,14 @@ driver_info = OrderedDict([
             'LDC3724B': ('ILX Lightwave', ['3724B']),
         },
     }),
+    ('laserdiodecontrollers.newport', {
+        'params': ['visa_address'],
+        'classes': ['Model5005'],
+        'imports': [],
+        'visa_info': {
+            'Model5005': ('Newport', ['5005']),
+        },
+    }),
     ('lockins.sr844', {
         'params': ['visa_address'],
         'classes': [],
@@ -103,6 +111,12 @@ driver_info = OrderedDict([
         'classes': ['Filter_Flipper'],
         'imports': ['cffi', 'nicelib'],
     }),
+    ('motion.klinger', {
+        'params': ['visa_address'],
+        'classes': ['KlingerMotorController'],
+        'imports': ['visa'],
+        'visa_info': {},
+    }),
     ('motion.newmark', {
         'params': ['serial'],
         'classes': ['NSCA1'],
@@ -121,11 +135,25 @@ driver_info = OrderedDict([
             'HPMultimeter': ('HEWLETT-PACKARD', ['34401A']),
         },
     }),
-    ('powermeters.thorlabs', {
+    ('opticalswitch.diconopticalswitch', {
+        'params': ['port'],
+        'classes': ['DiConOpticalSwitch'],
+        'imports': ['serial'],
+    }),
+    ('powermeters.ilx_lightwave', {
         'params': ['visa_address'],
-        'classes': ['PM100D'],
+        'classes': ['OMM_6810B'],
         'imports': [],
         'visa_info': {
+            'OMM_6810B': ('ILX Lightwave', ['6810B']),
+        },
+    }),
+    ('powermeters.thorlabs', {
+        'params': ['visa_address'],
+        'classes': ['PM100A', 'PM100D'],
+        'imports': [],
+        'visa_info': {
+            'PM100A': ('Thorlabs', ['PM100A']),
             'PM100D': ('Thorlabs', ['PM100D']),
         },
     }),
@@ -135,6 +163,14 @@ driver_info = OrderedDict([
         'imports': [],
         'visa_info': {
             'GPD_3303S': ('GW INSTEK', ['GPD-3303S']),
+        },
+    }),
+    ('relaycontrollers.probecardinterface', {
+        'params': ['visa_address'],
+        'classes': ['ProbecardInterface'],
+        'imports': [],
+        'visa_info': {
+            'ProbecardInterface': ('MIT POE GROUP', ['Probecard-interface']),
         },
     }),
     ('scopes.agilent', {
@@ -147,7 +183,7 @@ driver_info = OrderedDict([
     }),
     ('scopes.tektronix', {
         'params': ['visa_address'],
-        'classes': ['MSO_DPO_2000', 'MSO_DPO_4000', 'TDS_1000', 'TDS_200', 'TDS_2000', 'TDS_3000'],
+        'classes': ['MSO_DPO_2000', 'MSO_DPO_4000', 'TDS_1000', 'TDS_200', 'TDS_2000', 'TDS_3000', 'TDS_7000'],
         'imports': ['pyvisa', 'visa'],
         'visa_info': {
             'MSO_DPO_2000': ('TEKTRONIX', ['MSO2012', 'MSO2014', 'MSO2024', 'DPO2012', 'DPO2014', 'DPO2024']),
@@ -156,6 +192,23 @@ driver_info = OrderedDict([
             'TDS_200': ('TEKTRONIX', ['TDS 210', 'TDS 220', 'TDS 224']),
             'TDS_2000': ('TEKTRONIX', ['TDS 2002B', 'TDS 2004B', 'TDS 2012B', 'TDS 2014B', 'TDS 2022B', 'TDS 2024B']),
             'TDS_3000': ('TEKTRONIX', ['TDS 3012', 'TDS 3012B', 'TDS 3012C', 'TDS 3014', 'TDS 3014B', 'TDS 3014C', 'TDS 3032', 'TDS 3032B', 'TDS 3032C', 'TDS 3034', 'TDS 3034B', 'TDS 3034C', 'TDS 3052', 'TDS 3052B', 'TDS 3052C', 'TDS 3054', 'TDS 3054B', 'TDS 3054C']),
+            'TDS_7000': ('TEKTRONIX', ['TDS7154', 'TDS7254', 'TDS7404']),
+        },
+    }),
+    ('sourcemeasureunit.hp', {
+        'params': ['visa_address'],
+        'classes': ['HP_4156C'],
+        'imports': [],
+        'visa_info': {
+            'HP_4156C': ('HEWLETT-PACKARD', ['4156C']),
+        },
+    }),
+    ('sourcemeasureunit.keithley', {
+        'params': ['visa_address'],
+        'classes': ['Keithley_2400'],
+        'imports': [],
+        'visa_info': {
+            'Keithley_2400': ('Keithley', ['2400']),
         },
     }),
     ('spectrometers.bristol', {
