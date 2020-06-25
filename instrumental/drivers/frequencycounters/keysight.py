@@ -1,7 +1,7 @@
 
-from instrumental.drivers.frequencycounters import FrequencyCounter
-from instrumental.drivers import VisaMixin
-from instrumental import Q_
+from . import FrequencyCounter
+from .. import Facet,SCPI_Facet,VisaMixin
+from ... import Q_
 
 class FC53220A(FrequencyCounter, VisaMixin):
     """
@@ -9,14 +9,18 @@ class FC53220A(FrequencyCounter, VisaMixin):
 
     Usage Example:
         from instrumental.drivers.frequencycounters.keysight import FC53220A
-        smu = HP_4156C(visa_address='GPIB0::17::INSTR')
-        smu.identify()
-        smu.close()
+        fc = FC53220A(visa_address='USB0::0x0957::0x1807::MY50009613::INSTR')
+        fc.identify()
+        fc.close()
     """
     _INST_PARAMS_ = ['visa_address']
 
     def _initialize(self):
       self.resource.read_termination = '\n'
+      self.write('*RST') # Reset to default settings
+
+    def identify(self):
+        print(self.query('*IDN?'))
 
     def frequency(self):
       """The measured frequency"""
@@ -38,10 +42,14 @@ class FC53220A(FrequencyCounter, VisaMixin):
 
         return Q_(singleperiod_s, 's')
 
+    def set_mode_totalize(self, integration_time= 1.0):
+        self.write('CONF:TOT:TIM {}'.format(integration_time))
 
 
+    Vthreshold = SCPI_Facet('INP1:LEV', units='V', convert=float, doc="Threshold voltage")
+    slope = SCPI_Facet('INP1:SLOP', convert=str, doc="Triggering slope") # "NEG" or "POS"
+    coupling = SCPI_Facet('INP1:COUP', convert=str, doc="Input coupling") # "DC" or "AC"
+    impedance = SCPI_Facet('INP1:IMP', units='ohm', convert=float, doc="Input impedance") # 50 or 1e6
 
-    Vthreshold = SCPI_Facet('INP1:LEV ', units='V', type=float, doc="Threshold voltage")
-    slope = SCPI_Facet('INP1:SLOP ', type=string, doc="Triggering slope")
-    coupling = SCPI_Facet('INP1:COUP ', type=string, doc="Input coupling")
-    impedance = SCPI_Facet('INP1:IMP ', units='Ohm', type=int, doc="Input impedance")
+    temp = SCPI_Facet('SYST:TEMP', units='degC', convert=float, readonly=True,
+                        doc="Temperature of system in deg C")

@@ -1,4 +1,4 @@
-# Auto-generated 2020-04-08T12:31:34.162153
+# Auto-generated 2020-06-24T21:54:59.402538
 from collections import OrderedDict
 
 driver_info = OrderedDict([
