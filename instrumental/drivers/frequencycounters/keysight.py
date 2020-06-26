@@ -50,6 +50,7 @@ class FC53220A(FrequencyCounter, VisaMixin):
     slope = SCPI_Facet('INP1:SLOP', convert=str, doc="Triggering slope") # "NEG" or "POS"
     coupling = SCPI_Facet('INP1:COUP', convert=str, doc="Input coupling") # "DC" or "AC"
     impedance = SCPI_Facet('INP1:IMP', units='ohm', convert=float, doc="Input impedance") # 50 or 1e6
+    display = SCPI_Facet('DISP', convert=str, doc="Display state") # 'ON' or 'OFF'
 
     temp = SCPI_Facet('SYST:TEMP', units='degC', convert=float, readonly=True,
                         doc="Temperature of system in deg C")

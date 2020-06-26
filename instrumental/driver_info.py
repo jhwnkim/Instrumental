@@ -1,4 +1,4 @@
-# Auto-generated 2020-06-24T21:54:59.402538
+# Auto-generated 2020-06-25T11:16:24.663237
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -25,7 +25,7 @@ driver_info = OrderedDict([
     ('frequencycounters.keysight', {
         'params': ['visa_address'],
         'classes': ['FC53220A'],
-        'imports': ['instrumental'],
+        'imports': [],
         'visa_info': {},
     }),
     ('funcgenerators.agilent', {
