@@ -1,4 +1,4 @@
-# Auto-generated 2020-06-25T11:16:24.663237
+# Auto-generated 2020-06-27T14:48:26.523302
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -30,13 +30,13 @@ driver_info = OrderedDict([
     }),
     ('funcgenerators.agilent', {
         'params': ['visa_address'],
-        'classes': ['Agilent33250A', 'AgilentE4400B', 'AgilentMXG', 'Agilent81110A'],
+        'classes': ['Agilent33250A', 'Agilent81110A', 'AgilentE4400B', 'AgilentMXG'],
         'imports': [],
         'visa_info': {
             'Agilent33250A': ('Agilent Technologies', ['33250A']),
+            'Agilent81110A': ('HEWLETT-PACKARD', ['HP81110A']),
             'AgilentE4400B': ('Hewlett-Packard', ['ESG-1000B']),
             'AgilentMXG': ('Agilent Technologies', ['N5181A']),
-            'Agilent81110A': ('Hewlett-Packard', ['HP81110A']),
         },
     }),
     ('funcgenerators.rigol', {
@@ -140,6 +140,14 @@ driver_info = OrderedDict([
         'params': ['port'],
         'classes': ['DiConOpticalSwitch'],
         'imports': ['serial'],
+    }),
+    ('powermeters.hp', {
+        'params': ['visa_address'],
+        'classes': ['HP_8153A'],
+        'imports': [],
+        'visa_info': {
+            'HP_8153A': ('HP Lightwave', ['8153A']),
+        },
     }),
     ('powermeters.ilx_lightwave', {
         'params': ['visa_address'],
