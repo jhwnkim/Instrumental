@@ -31,19 +31,19 @@ class HP_8153A(PowerMeter, VisaMixin):
         self.int_time = 0.05 # seconds
 
         # Set units to W
-        self.write("SENS:POW:UNIT 1")
+        self.write("SENS2:POW:UNIT 1")
         # self.write("SENS%d:CHAN1:POW:UNIT 1" % self.rec_channel)
 
         # Automatic power range
-        self.write("SENS:POW:RANG:AUTO 1" % self.tap_channel)
+        self.write("SENS2:POW:RANG:AUTO 1" )
         # self.write("SENS%d:CHAN1:POW:RANG:AUTO 1" % self.rec_channel)
 
         # Set integration time
-        self.write("SENS:POW:ATIME %.3fS" % self.int_time)
+        # self.write("SENS2:POW:ATIME %.3fS" % self.int_time)
         # self.write("SENS%d:CHAN1:POW:ATIME %.3fS" % (self.rec_channel, self.int_time))
 
         # Do not measure continuously
-        self.write("INIT:CONT 0")
+        self.write("INIT2:CONT 0")
         # self.write("INIT%d:CHAN1:CONT 0" % self.rec_channel)
 
     def identify(self):
@@ -61,19 +61,19 @@ class HP_8153A(PowerMeter, VisaMixin):
     #                         doc="Measured Power")
     # Not using SCPI_Facet because the value gets stuck when auto ranging
     def power(self):
-        self.write("INIT1:IMM")
+        self.write("INIT2:IMM")
         try:
-            meas_power = max(0.0, float(self.query('FETC1:POW?')))
+            meas_power = max(0.0, float(self.query('FETC2:POW?')))
         except ValueError:
             meas_power = 0.0
 
         return Q_(meas_power, units='W')
 
-    wavelength = SCPI_Facet('SENS1:POW:WAVE', units='nm', type=float,
+    wavelength = SCPI_Facet('SENS2:POW:WAVE', units='nm', type=float,
                             doc="Input signal wavelength")
 
-    auto_range = SCPI_Facet('SENS1:POW:RANG:AUTO', convert=int, value={False:0, True:1},
+    auto_range = SCPI_Facet('SENS2:POW:RANG:AUTO', convert=int, value={False:0, True:1},
                             doc="Whether auto-ranging is enabled")
 
-    integration_time = SCPI_Facet('SEN1:POW:ATIME', units='s', type=float,
+    integration_time = SCPI_Facet('SENS2:POW:ATIME', units='s', type=float,
                             doc="Measurement integration time in seconds 20ms to 3600s available")

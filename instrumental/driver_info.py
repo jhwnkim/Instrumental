@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 # Auto-generated 2020-06-27T14:48:26.523302
+=======
+# Auto-generated 2020-06-29T19:39:13.623115
+>>>>>>> Stashed changes
 from collections import OrderedDict
 
 driver_info = OrderedDict([
