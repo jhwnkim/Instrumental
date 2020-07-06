@@ -15,22 +15,26 @@ class FC53220A(FrequencyCounter, VisaMixin):
     """
     _INST_PARAMS_ = ['visa_address']
 
-    def _initialize(self):
-      self.resource.read_termination = '\n'
-      self.write('*RST') # Reset to default settings
+    def _initialize(self, timeout=60000):
+        self.channel = 1
+        self.resource.read_termination = '\n'
+        self._rsrc.timeout = timeout # ms timeout
+        self.write('*RST') # Reset to default settings
 
     def identify(self):
         print(self.query('*IDN?'))
 
     def frequency(self):
-      """The measured frequency"""
-      frequency_Hz = float(self.query('MEAS:FREQ?'))
-      return Q_(frequency_Hz, 'Hz')
+        """The measured frequency"""
+        frequency_Hz = float(self.query('MEAS:FREQ?'))
+
+        return Q_(frequency_Hz, 'Hz')
 
     def period(self):
-      """The measured period"""
-      period_s = float(self.query('MEAS:PER?'))
-      return Q_(period_s, 's')
+        """The measured period"""
+        period_s = float(self.query('MEAS:PER?'))
+
+        return Q_(period_s, 's')
 
     def single_period(self, num_counts = 1):
         """Time between triggering events"""
@@ -44,6 +48,10 @@ class FC53220A(FrequencyCounter, VisaMixin):
 
     def set_mode_totalize(self, integration_time= 1.0):
         self.write('CONF:TOT:TIM {}'.format(integration_time))
+
+    def set_mode_single_period(self, num_counts=100):
+        self.write('CONF:SPER') # Configure instrument for single period measurement
+        self.write('SAMP:COUN {}'.format(num_counts)) # Collect num_counts counts (for each trigger)
 
 
     Vthreshold = SCPI_Facet('INP1:LEV', units='V', convert=float, doc="Threshold voltage")
