@@ -77,11 +77,7 @@ class HP_8153A(PowerMeter, VisaMixin):
             print("channel {} not available. select 1 or 2".format(channel))
             return Q_(0, 'W')
 
-    def set_channel(self, channel=2):
-
-
-
-    wavelength2 = SCPI_Facet('SENS2:POW:WAVE', units='nm', type=float,
+    wavelength2 = SCPI_Facet('SENS2:POW:WAVE', units='m', type=float,
                             doc="Input signal wavelength")
 
     auto_range2 = SCPI_Facet('SENS2:POW:RANG:AUTO', convert=int, value={False:0, True:1},
@@ -90,7 +86,7 @@ class HP_8153A(PowerMeter, VisaMixin):
     integration_time2 = SCPI_Facet('SENS2:POW:ATIME', units='s', type=float,
                             doc="Measurement integration time in seconds 20ms to 3600s available")
 
-    wavelength1 = SCPI_Facet('SENS1:POW:WAVE', units='nm', type=float,
+    wavelength1 = SCPI_Facet('SENS1:POW:WAVE', units='m', type=float,
                             doc="Input signal wavelength")
 
     auto_range1 = SCPI_Facet('SENS1:POW:RANG:AUTO', convert=int, value={False:0, True:1},
