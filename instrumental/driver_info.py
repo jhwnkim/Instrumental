@@ -1,4 +1,3 @@
-# Auto-generated 2020-07-17T21:02:50.096214
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -218,6 +217,14 @@ driver_info = OrderedDict([
         'imports': [],
         'visa_info': {
             'Keithley_2400': ('Keithley', ['2400']),
+        },
+    }),
+    ('sourcemeasureunit.keysight', {
+        'params': ['visa_address'],
+        'classes': ['B2902A'],
+        'imports': [],
+        'visa_info': {
+            'B2902A': ('Keysight', ['B2902A']),
         },
     }),
     ('spectrometers.bristol', {
