@@ -7,18 +7,21 @@ This driver talks to ICE BLOC the controller for the Solstis laser through TCP/I
 
 Usage Example:
     from instrumental.drivers.lasers.solstis import M2_Solstis
-    laser = M2_Solstis(host_address='localhost', port=9001, client_ip='192.168.1.100')
+    # laser = M2_Solstis()
     laser.set_wavelength(wavelength=850.0)
-    print( laser.get_wavelength() )
+    wavelength =  laser.get_wavelength()
     laser.close()
 """
 from . import Laser
 import socket
 import json
 from time import sleep
+import sys
+import numpy as np
 from ... import Q_
 
-_INST_PARAMS = ['host_address', 'port', 'client_ip']
+_INST_CLASSES = ['M2_Solstis']
+
 
 class M2_Solstis(Laser):
     """ A M2 Solstis tunable laser.
@@ -28,6 +31,8 @@ class M2_Solstis(Laser):
         port : Port
         client_ip : client ip setting in ICE BLOC
     """
+    # _INST_PARAMS_ = ['host_address', 'port', 'client_ip']
+    # _INST_PARAMS_ = []
 
     def _initialize(self):
         """ Initializes socket communications with laser controller and sends start_link command
@@ -35,14 +40,20 @@ class M2_Solstis(Laser):
         # Internal parameters
         self.timeout = 1.0
         self.wavelength_tolerance = Q_(0.1,'nm')
-        self.poll_timeout = 10
+        self.poll_timeout = 30
+        host_address='localhost'
+        port=9001
+        client_ip='192.168.1.100'
 
         try:
             self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.s.settimeout(self.timeout) # sets timeout to 1 second
+            self.s.settimeout(self.timeout) # sets timeout
+            # self.s.connect((self._paramset['host_address'], self._paramset['port']))
             self.s.connect((host_address, port))
         except:
+            # print('M2_Solstis: cannot open socket connection to {}:{}'.format(self._paramset['host_address'], self._paramset['port']))
             print('M2_Solstis: cannot open socket connection to {}:{}'.format(host_address, port))
+            print("Unexpected error:", sys.exc_info()[0])
             self.s = None
         else:
             # send start link command and parse return
@@ -61,9 +72,11 @@ class M2_Solstis(Laser):
 
             json_reply = json.loads(self.s.recv(1024))
             if json_reply['message']['transmission_id'][0] == 1 and json_reply['message']['parameters']['status'] == 'ok':
-                print('M2_Solstis: successfully started link to {}:{} as {}'.format(host_address, port, client_id))
+                # print('M2_Solstis: successfully started link to {}:{} as {}'.format(self._paramset['host_address'], self._paramset['port'], self._paramset['client_id']))
+                print('M2_Solstis: successfully started link to {}:{} as {}'.format(host_address, port, client_ip))
             else:
-                print('M2_Solstis: failed to start link to {}:{} as {}'.format(host_address, port, client_id))
+                # print('M2_Solstis: failed to start link to {}:{} as {}'.format(self._paramset['host_address'], self._paramset['port'], self._paramset['client_id']))
+                print('M2_Solstis: failed to start link to {}:{} as {}'.format(host_address, port, client_ip))
                 print('M2_Solstis: reply from controller {}'.format(json_reply))
 
                 self.s.close()
@@ -128,11 +141,19 @@ class M2_Solstis(Laser):
             self.s.sendall(bytes(json.dumps(json_getwave),'utf-8'))
             sleep(1.0)
             json_reply=json.loads(self.s.recv(1024))
-            if json_reply['message']['transmission_id'][0] == transID and json_reply['message']['parameters']['status'] == 'ok':
+            if (json_reply['message']['transmission_id'] == [transID]) and (json_reply['message']['parameters']['status'] in [[0], [2], [3]]):
                 wavelength = Q_(json_reply['message']['parameters']['current_wavelength'][0], 'nm')
                 print('M2_Solstis: Current wavelength from wavemeter is {}'.format(wavelength))
 
+                if json_reply['message']['parameters']['status'] ==[0]:
+                    print('M2_Solstis: idle')
+                if json_reply['message']['parameters']['status'] ==[2]:
+                    print('M2_Solstis: Tuning laser wavelength')
+                elif json_reply['message']['parameters']['status'] ==[3]:
+                    print('M2_Solstis: maintaining target wavelength at {}'.format(wavelength))
+
                 return wavelength
+
             else:
                 print('M2_Solstis: failed poll wavelength')
                 print('M2_Solstis: reply from controller {}'.format(json_reply))
@@ -175,7 +196,7 @@ class M2_Solstis(Laser):
             self.s.sendall(bytes(json.dumps(json_setwave),'utf-8'))
             sleep(1.0)
             json_reply=json.loads(self.s.recv(1024))
-            if json_reply['message']['transmission_id'][0] == transID and json_reply['message']['parameters']['status'][0] == 0:
+            if json_reply['message']['transmission_id'] == [transID] and json_reply['message']['parameters']['status'] == [0]:
                 print('M2_Solstis: started tuning to {}'.format(wavelength))
 
                 for i in range(self.poll_timeout):

@@ -1,4 +1,4 @@
-# Auto-generated 2020-07-17T21:30:05.830772
+# Auto-generated 2020-08-15T10:40:05.547970
 from collections import OrderedDict
 
 driver_info = OrderedDict([
@@ -70,6 +70,11 @@ driver_info = OrderedDict([
         'visa_info': {
             'Model5005': ('Newport', ['5005']),
         },
+    }),
+    ('lasers.m2_solstis', {
+        'params': [],
+        'classes': ['M2_Solstis'],
+        'imports': [],
     }),
     ('lockins.sr844', {
         'params': ['visa_address'],
