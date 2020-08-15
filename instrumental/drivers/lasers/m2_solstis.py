@@ -6,139 +6,195 @@ Driver for M2 Solstis Tunable Laser
 This driver talks to ICE BLOC the controller for the Solstis laser through TCP/IP sockets
 
 Usage Example:
-from instrumental.drivers.lasers.solstis import M2_Solstis
-laser = M2_Solstis(client_ip='192.168.1.100', port=9001, address='localhost')
-laser.identify()
-laser.set_wavelength(wavelength=850.0)
-print( laser.get_wavelength() )
-laser.close()
+    from instrumental.drivers.lasers.solstis import M2_Solstis
+    laser = M2_Solstis(host_address='localhost', port=9001, client_ip='192.168.1.100')
+    laser.set_wavelength(wavelength=850.0)
+    print( laser.get_wavelength() )
+    laser.close()
 """
 from . import Laser
+import socket
+import json
+from time import sleep
+from ... import Q_
 
-_INST_PARAMS = ['client_ip', 'port', 'address']
+_INST_PARAMS = ['host_address', 'port', 'client_ip']
 
 class M2_Solstis(Laser):
     """ A M2 Solstis tunable laser.
 
-    client_ip :
-    port : Port
-    address : Address to 
+    _INST_PARAMS:
+        host_address : Address to control computer
+        port : Port
+        client_ip : client ip setting in ICE BLOC
     """
 
     def _initialize(self):
-        pass
+        """ Initializes socket communications with laser controller and sends start_link command
+        """
+        # Internal parameters
+        self.timeout = 1.0
+        self.wavelength_tolerance = Q_(0.1,'nm')
+        self.poll_timeout = 10
 
-    def is_control_on(self):
-        """ Returns the status of the hardware input control.
+        try:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.s.settimeout(self.timeout) # sets timeout to 1 second
+            self.s.connect((host_address, port))
+        except:
+            print('M2_Solstis: cannot open socket connection to {}:{}'.format(host_address, port))
+            self.s = None
+        else:
+            # send start link command and parse return
+            json_startlink = {
+                'message': {
+                    'transmission_id': [1],
+                    'op': 'start_link',
+                    'parameters': {
+                        'ip_address': client_ip
+                    }
+                }
+            }
 
-        Hardware input control must be on in order for the laser to be
-        controlled by usb connection.
+            command_startlink = json.dumps(json_startlink)
+            self.s.sendall(bytes(command_startlink,'utf-8'))
+
+            json_reply = json.loads(self.s.recv(1024))
+            if json_reply['message']['transmission_id'][0] == 1 and json_reply['message']['parameters']['status'] == 'ok':
+                print('M2_Solstis: successfully started link to {}:{} as {}'.format(host_address, port, client_id))
+            else:
+                print('M2_Solstis: failed to start link to {}:{} as {}'.format(host_address, port, client_id))
+                print('M2_Solstis: reply from controller {}'.format(json_reply))
+
+                self.s.close()
+                self.s = None
+
+    def one_shot(self):
+        """ Runs one-shot routine for beam alignment
+        First moves the laser's center wavelength to 780 nm followed by one-shot command
+        Returns
+        -------
+        status: str
+            returns status of the one shot command
+        """
+        self.set_wavelength(wavelength = Q_(780, 'nm'))
+
+        if self.s is not None:
+            transID=97
+            json_oneshot = {
+                'message': {
+                    'transmission_id': [transID],
+                    'op': 'beam_alignment',
+                    'parameters': {
+                        'mode': [4]
+                    }
+                }
+            }
+            self.s.sendall(bytes(json.dumps(json_oneshot),'utf-8'))
+            sleep(1.0)
+            json_reply=json.loads(self.s.recv(1024))
+            if json_reply['message']['parameters']['status'] == 0:
+                print('M2_Solstis: one shot beam alignment successful')
+
+                return 'Success'
+            elif json_reply['message']['parameters']['status'] == 1:
+                print('M2_Solstis: one shot beam alignment failed')
+
+                return 'Failed'
+            else:
+                print('Gavin says things are fucked up, yo')
+
+                return 'fubar'
+        else:
+            print('M2_Solstis: socket not connected')
+            return 'Failed'
+
+    def get_wavelength(self):
+        """ Returns wavelength from wavemeter in nanometers
 
         Returns
         -------
-        message : bool
-            If True, hardware input conrol is on.
+        wavelength : Q_ class
+            returns current measured wavelength if successful or Q_(0.0, 'nm') otherwise
         """
-        message = self._ask('(param-ref hw-input-dis)')
-        message = bool_dict[message]
-        return message
+        if self.s is not None:
+            transID=99
+            json_getwave = {
+                'message': {
+                    'transmission_id': [transID],
+                    'op': 'poll_wave_m'
+                }
+            }
+            self.s.sendall(bytes(json.dumps(json_getwave),'utf-8'))
+            sleep(1.0)
+            json_reply=json.loads(self.s.recv(1024))
+            if json_reply['message']['transmission_id'][0] == transID and json_reply['message']['parameters']['status'] == 'ok':
+                wavelength = Q_(json_reply['message']['parameters']['current_wavelength'][0], 'nm')
+                print('M2_Solstis: Current wavelength from wavemeter is {}'.format(wavelength))
 
-    def set_control(self, control):
-        """ Sets the status of the hardware input control.
+                return wavelength
+            else:
+                print('M2_Solstis: failed poll wavelength')
+                print('M2_Solstis: reply from controller {}'.format(json_reply))
 
-        Hardware input control must be on in order for the laser to be
-        controlled by usb connection.
+                return Q_(0.0, 'nm')
+        else:
+            print('M2_Solstis: socket not connected')
+            return Q_(0.0, 'nm')
+
+    def set_wavelength(self, wavelength):
+        """ Sends set wavelength command and checks reply
 
         Parameters
         ----------
-        control : bool
-            If True, hardware input conrol is turned on.
+        wavelength : Q_ class
+            target wavelength
 
         Returns
         -------
         error : int or str
-            Zero is returned if the hardware input control status was set
-            correctly.  Otherwise, the error string returned by the laser
-            is returned.
+            Zero is returned if wavelength was set correctly.
+            1 if not within tolerance after poll timeout.
+            Otherwise, error string returned by the laser is returned.
         """
-        for key, item in bool_dict.iteritems():
-            if item == control:
-                control = key
-        error = self._ask('(param-set! hw-input-dis {})'.format(control),
-                          return_error=True)
-        return error
+        if self.s is None:
+            print('M2_Solstis: socket not connected')
+            return Q_(0.0, 'nm')
+        else:
+            transID=91
+            json_setwave = {
+                'message': {
+                    'transmission_id': [transID],
+                    'op': 'set_wave_m',
+                    'parameters': {
+                        'wavelength': [wavelength.to('nm').magnitude]
+                    }
+                }
+            }
 
-    def is_on(self):
-        """
-        Indicates if the laser is on (True) or off (False).
-        """
-        message = self._ask('(param-ref laser:en)')
-        message = bool_dict[message]
-        return message
+            self.s.sendall(bytes(json.dumps(json_setwave),'utf-8'))
+            sleep(1.0)
+            json_reply=json.loads(self.s.recv(1024))
+            if json_reply['message']['transmission_id'][0] == transID and json_reply['message']['parameters']['status'][0] == 0:
+                print('M2_Solstis: started tuning to {}'.format(wavelength))
 
-    def _set_emission(self, control):
-        """ Sets the emission status of the laser.
+                for i in range(self.poll_timeout):
+                    current_wavelength = self.get_wavelength()
+                    if np.abs(current_wavelength - wavelength) < self.wavelength_tolerance:
+                        print('M2_Solstis: finished tuning to {}'.format(current_wavelength))
+                        return 0
 
-        Parameters
-        ----------
-        control : bool
-            If True, the laser output is turned on.  If False, the laser output
-            is turned off.
+                print('M2_Solstis: current wavelength {}'.format(current_wavelength))
+                return 1
+            else:
+                print('M2_Solstis: failed poll wavelength')
+                print('M2_Solstis: reply from controller {}'.format(json_reply))
 
-        Returns
-        -------
-        error : int or str
-            Zero is returned if the emission status was set
-            correctly.  Otherwise, the error string returned by the laser
-            is returned.
-        """
-        for key, item in bool_dict.iteritems():
-            if item == control:
-                control = key
-        error = self._ask('(param-set! laser:en {})'.format(control),
-                          return_error=True)
-        return error
-
-    def turn_on(self):
-        """ Turns the laser on.
-
-        Note that hardware control must be enabled in order for this method
-        to execute properly.
-
-        Returns
-        -------
-        error : int or str
-            Zero is returned if the laser was successfuly turned on.
-            Otherwise, the error string returned by the laser is returned.
-        """
-        return self._set_emission(True)
-
-    def turn_off(self):
-        """  Turns the laser off.
-
-        Note that hardware control must be enabled in order for this method
-        to execute properly.
-
-        Returns
-        -------
-        error : int or str
-            Zero is returned if the laser was correctly turned off.
-            Otherwise, the error string returned by the laser is returned.
-        """
-        return self._set_emission(False)
-
-    def _ask(self, message, return_error=False):
-        self._rsrc.ask(message)
-        message = self._rsrc.read(termination='\n')
-        if return_error:
-            error = message
-            if error == '0':
-                error = int(error)
-            return error
-        return message
+                return json_reply
 
     def close(self):
         """
-        Closes the connection to the laser.
+        Closes socket connection to the laser.
         """
-        self._rsrc.close()
+        if self.s is not None:
+            self.s.close()
