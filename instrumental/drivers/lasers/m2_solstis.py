@@ -44,6 +44,7 @@ class M2_Solstis(Laser):
         host_address='localhost'
         port=9001
         client_ip='192.168.1.100'
+        self.latest_reply = None
 
         try:
             self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -106,6 +107,7 @@ class M2_Solstis(Laser):
             self.s.sendall(bytes(json.dumps(json_oneshot),'utf-8'))
             sleep(1.0)
             json_reply=json.loads(self.s.recv(1024))
+            self.latest_reply = json_reply
             if json_reply['message']['parameters']['status'] == 0:
                 print('M2_Solstis: one shot beam alignment successful')
 
@@ -130,6 +132,9 @@ class M2_Solstis(Laser):
         wavelength : Q_ class
             returns current measured wavelength if successful or Q_(0.0, 'nm') otherwise
         """
+
+        wavelength =  Q_(0.0, 'nm')
+
         if self.s is not None:
             transID=99
             json_getwave = {
@@ -152,16 +157,17 @@ class M2_Solstis(Laser):
                 elif json_reply['message']['parameters']['status'] ==[3]:
                     print('M2_Solstis: maintaining target wavelength at {}'.format(wavelength))
 
-                return wavelength
-
             else:
                 print('M2_Solstis: failed poll wavelength')
                 print('M2_Solstis: reply from controller {}'.format(json_reply))
 
-                return Q_(0.0, 'nm')
+                wavelength =  Q_(0.0, 'nm')
         else:
             print('M2_Solstis: socket not connected')
-            return Q_(0.0, 'nm')
+            wavelength =  Q_(0.0, 'nm')
+
+        self.latest_reply = json_reply
+        return wavelength
 
     def set_wavelength(self, wavelength):
         """ Sends set wavelength command and checks reply
@@ -196,12 +202,13 @@ class M2_Solstis(Laser):
             self.s.sendall(bytes(json.dumps(json_setwave),'utf-8'))
             sleep(1.0)
             json_reply=json.loads(self.s.recv(1024))
+            self.latest_reply = json_reply
             if json_reply['message']['transmission_id'] == [transID] and json_reply['message']['parameters']['status'] == [0]:
                 print('M2_Solstis: started tuning to {}'.format(wavelength))
 
                 for i in range(self.poll_timeout):
                     current_wavelength = self.get_wavelength()
-                    if np.abs(current_wavelength - wavelength) < self.wavelength_tolerance:
+                    if self.latest_reply['message']['parameters']['status'] in [[3]]:
                         print('M2_Solstis: finished tuning to {}'.format(current_wavelength))
                         return 0
 
