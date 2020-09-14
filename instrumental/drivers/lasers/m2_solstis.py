@@ -144,7 +144,7 @@ class M2_Solstis(Laser):
                 }
             }
             self.s.sendall(bytes(json.dumps(json_getwave),'utf-8'))
-            sleep(1.0)
+            sleep(5.0)
             json_reply=json.loads(self.s.recv(1024))
             if (json_reply['message']['transmission_id'] == [transID]) and (json_reply['message']['parameters']['status'] in [[0], [2], [3]]):
                 wavelength = Q_(json_reply['message']['parameters']['current_wavelength'][0], 'nm')
