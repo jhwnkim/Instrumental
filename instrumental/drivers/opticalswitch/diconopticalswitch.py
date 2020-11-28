@@ -24,8 +24,16 @@ class DiConOpticalSwitch(OpticalSwitch):
         self._ser.reset_input_buffer()
         self._ser.write(b'CF?\r')
         self._ser.read() # dummy read the newline
-        self._channel_max = int(re.split(',', self._ser.readline())[1])
-        # self._channel_max = 16
+        reply = self._ser.readline().decode("utf-8")
+        try:
+            self._channel_max = int(re.split(',', reply)[1])
+        except Exception as ex:
+            self._channel_max = 16
+            print(ex)
+            print(reply)
+
+        # Park switch
+        self.park_switch()
 
     def identify(self):
         self._ser.reset_input_buffer()
@@ -47,9 +55,12 @@ class DiConOpticalSwitch(OpticalSwitch):
         self._ser.read() # dummy read the newline
         print(self._ser.readline())
 
-    def close(self):
-        # Park Switch
+    def park_switch(self):
+        # Park switch
         self._ser.write(b'PK\r')
+
+    def close(self):
+        self.park_switch()
 
         # Close serial port
         self._ser.close()
